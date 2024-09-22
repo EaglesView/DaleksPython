@@ -74,7 +74,7 @@ class Modele():  # Logique
 
         #pos_invalide = [[self.doc.x, self.doc.y], self.liste_daleks,self.liste_ferrailles]
         pos_invalide = [[self.doc.y,self.doc.x]]
-        pos_invalide.extend(self.liste_ferrailles)
+        pos_invalide.extend(self.liste_ferrailles) #Permet d'append une liste
         #Ajout des Daleks et 2 Unités au tour des Daleks
         for dalek in self.liste_daleks:
             for dalek_x in range(-2,3): # de -2 a +2
