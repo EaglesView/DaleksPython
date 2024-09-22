@@ -18,6 +18,7 @@ class Modele():  # Logique
         self.nb_daleks_par_niveau = 5
         self.liste_difficulte = ["Facile","Modéré","Difficile"]
         self.difficulte = "Facile"
+        self.nb_zappers = 0
 
     def choix_difficulte(self,reponse:int):
         self.difficulte = self.liste_difficulte[int(reponse)-1]
@@ -25,6 +26,7 @@ class Modele():  # Logique
 
     def creer_niveau(self):
         self.niveau += 1
+        self.nb_zappers += 1
         nb_daleks = self.niveau * self.nb_daleks_par_niveau
         pos_possible = [[self.doc.x, self.doc.y]] # list
 
@@ -55,21 +57,29 @@ class Modele():  # Logique
             elif self.liste_daleks[i].y < self.doc.y:
                 self.liste_daleks[i].y += 1
 
+    def collision_docteur(self):
+        for i in self.liste_daleks:
+            if self.doc.x == i.x and self.doc.y == i.y:
+                print("BAM BAM DEAD")
+                #Faire un ecran de mort
+
     def collision(self):
         #self.liste_daleks
         mort = set()
 
-        #TODO : Créer le système de ferraille
         for i in self.liste_daleks:
             for j in self.liste_daleks:
                 if i != j and i.x == j.x and i.y == j.y:
                     mort.add(i)
                     self.liste_ferrailles.append(i)
 
-
         for i in mort:
             if i in self.liste_daleks:
                 self.liste_daleks.remove(i)
+                print(self.liste_daleks)
+    ##Validation de fin de niveau 
+        if self.liste_daleks == []:
+            self.creer_niveau()
 
     def teleportage(self):
 
@@ -100,20 +110,19 @@ class Modele():  # Logique
         if [x, y] not in pos_invalide:
             self.doc.x = x
             self.doc.y = y
-       
 
+    def zapper(self):
+        positions_zapped = []
+        for doc_x in range(-1,2):
+            for doc_y in range(-1,2):
+                zap_x = self.doc.x + doc_x
+                zap_y = self.doc.x + doc_x
+                for daleks in self.liste_daleks:
+                    if daleks.x == zap_x and daleks.y == zap_y:
+                        self.liste_daleks.remove(daleks)
+                        self.liste_ferrailles.append(daleks)
+                        
 
-    # def collision2(self): UNE HONTE
-    #     # self.liste_daleks
-    #     index = set()
-    #
-    #     for i in range(0, self.liste_daleks.__len__()):
-    #         for j in range(0, self.liste_daleks.__len__()):
-    #             if i != j and self.liste_daleks[i].x == self.liste_daleks[j].x and self.liste_daleks[i].y == self.liste_daleks[j].y:
-    #                 index.add(i)
-    #
-    #     for i in index:
-    #         self.liste_daleks.pop(i)
 
     def mise_a_jour_jeu(self, reponse : chr,difficulte:str):  # blinder le choix
         dico_valeur = {"1": [-1, 1],
@@ -131,8 +140,8 @@ class Modele():  # Logique
             self.deplacement_dalek() ## COMPORTEMENT: AUCUN DEPLACEMENT DE DALEK LORS DUN TELEPORT
         elif reponse == 't' or reponse == 'T':
             self.teleportage(difficulte)
-        #TODO:  Ajouter zapper
-        #if reponse == 'z' or reponse == 'Z':
+        elif reponse == 'z' or reponse == 'Z':
+            self.zapper()
 
 
 
@@ -175,56 +184,26 @@ class Vue():
         print("1. Commencer une partie")
         print("2. Leaderboard")
         print("3. Quitter\n")
-        #while True:
-        #    choix = input("Choix : ")
-        #    if choix in ['1', '2', '3']:
-        #        return choix
-    #def debug_affichage(nb_daleks,nb_daleks_par_niveau):
-    #    print("Affichage Debug \nNombre de Daleks: " + str(nb_daleks))
-    #    print("\nNiveau : " + str(niveau) + " Nombre de Daleks pour le niveau " + str(niveau) + ": " + str(nb_daleks_par_niveau*niveau))
-    #    print("\nNombre de collisions: " + str(nb_collisions))
 
-    #def afficher_aire_de_jeu(self, largeur, hauteur, doc, liste_daleks,liste_ferrailles):
-        #matrice_jeu = []
-        #for i in range(hauteur):
-        #    ligne = []
-        #    for j in range(largeur):
-        #        ligne.append("-")  # append = ajouter
-        #    matrice_jeu.append(ligne)
-#
-        #matrice_jeu[doc.y][doc.x] = "D"  # position docteur
-        #print("Position du Docteur [x,y] : " + "[" + str(doc.x+1) + "," + str(doc.y+1) + "]")
-        #for i in range(0, liste_daleks.__len__()):
-        #    matrice_jeu[liste_daleks[i].y][liste_daleks[i].x] = "X"
-        ##TODO Ajouter les positions de ferraille
-        #for i in range(0, liste_ferrailles.__len__()):
-        #    matrice_jeu[liste_ferrailles[i].y][liste_ferrailles[i].x] = "F"
-        #for i in matrice_jeu:
-        #    print(i)
-#
-        #pos_demandee = input(
-        #    "[z] : zapper \n" "[t] : teleporter\n"  "[1-9] : mouvement \n"  "Votre choix : ")  # input est une string
-        #print(pos_demandee)
-        #return pos_demandee
-    def afficher_aire_de_jeu(self, largeur, hauteur, doc, liste_daleks, liste_ferrailles):
+    def afficher_aire_de_jeu(self, largeur:int, hauteur:int, doc:list, liste_daleks:list, liste_ferrailles:list, nb_zappers:int,niveau):
         # display the game board
         matrice_jeu = [["[   ]" for _ in range(largeur)] for _ in range(hauteur)]
-        matrice_jeu[doc.y][doc.x] = "[ † ]"  # Doctor's position
+        matrice_jeu[doc.y][doc.x] = "[ ¤ ]"  
         for dalek in liste_daleks:
-            matrice_jeu[dalek.y][dalek.x] = "[ • ]"  # Dalek's position
+            matrice_jeu[dalek.y][dalek.x] = "[ Ð ]"  
         for ferraille in liste_ferrailles:
-            matrice_jeu[ferraille.y][ferraille.x] = "[ º ]"  # Scrap heap
+            matrice_jeu[ferraille.y][ferraille.x] = "[ † ]"  
         for row in matrice_jeu:
             print("".join(row))
-        print(f"Position du Docteur: [{doc.x+1}, {doc.y+1}]")
-
-
-
+        print(f"Position du Docteur: [{doc.x+1}, {doc.y+1}] || Nombre de zappeurs: "+str(nb_zappers)+" || NIVEAU "+str(niveau))
 
 class Controleur():  # À déjà créé l'objet # self # __init__ créé avec la l'objet
     def __init__(self):
         self.modele = Modele()
         self.vue = Vue()
+
+    def demarrer_jeu(self):
+        self.demander_choix_menu()
 
     def demander_choix_menu(self):
         self.vue.afficher_menu_principal()
@@ -252,7 +231,7 @@ class Controleur():  # À déjà créé l'objet # self # __init__ créé avec la
                 
 
     def demander_refraichissement_vue(self):
-        self.vue.afficher_aire_de_jeu(self.modele.largeur, self.modele.hauteur, self.modele.doc, self.modele.liste_daleks, self.modele.liste_ferrailles)
+        self.vue.afficher_aire_de_jeu(self.modele.largeur, self.modele.hauteur, self.modele.doc, self.modele.liste_daleks, self.modele.liste_ferrailles,self.modele.nb_zappers,self.modele.niveau)
         reponse = input("Votre choix (1-9 for movement, 't' to teleport): ")
         self.modele.mise_a_jour_jeu(reponse,self.modele.difficulte)
         self.modele.collision()
@@ -263,7 +242,7 @@ if __name__ == "__main__":
     c = Controleur()  # creation objet
 
     #c.vue.afficher_menu_principal()
-    c.demander_choix_menu()
+    c.demarrer_jeu()
     
 
 
