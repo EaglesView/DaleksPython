@@ -30,11 +30,11 @@ class Modele():  # Logique
             if [x, y] not in pos_possible:
                 pos_possible.append([x, y])
                 nb_daleks -= 1
-
-            pos_possible.pop(0) # pop doc
-            for i in pos_possible:
-                d = Dalek(i[0], i[1])
-                self.liste_daleks.append(d)
+        #NOTE: Il y avait une erreur d'intentation qui poppais des Daleks au hasard, pourquoi on avait juste 3 daleks desfois
+        pos_possible.pop(0) # pop doc
+        for i in pos_possible:
+            d = Dalek(i[0], i[1])
+            self.liste_daleks.append(d)
 
     def deplacement_dalek(self):
 
@@ -59,6 +59,7 @@ class Modele():  # Logique
             for j in self.liste_daleks:
                 if i != j and i.x == j.x and i.y == j.y:
                     mort.add(i)
+                    self.liste_ferrailles.append(i)
 
 
         for i in mort:
@@ -74,10 +75,7 @@ class Modele():  # Logique
         if [x, y] not in pos_invalide:
             self.doc.x = x
             self.doc.y = y
-        print(" position x")
-        print(x)
-        print(" position y")
-        print(y)
+       
 
 
     # def collision2(self): UNE HONTE
@@ -148,9 +146,12 @@ class Vue():
             choix = input("Choix : ")
             if choix in ['1', '2', '3']:
                 return choix
+    #def debug_affichage(nb_daleks,nb_daleks_par_niveau):
+    #    print("Affichage Debug \nNombre de Daleks: " + str(nb_daleks))
+    #    print("\nNiveau : " + str(niveau) + " Nombre de Daleks pour le niveau " + str(niveau) + ": " + str(nb_daleks_par_niveau*niveau))
+    #    print("\nNombre de collisions: " + str(nb_collisions))
 
-
-    def afficher_aire_de_jeu(self, largeur, hauteur, doc, liste_daleks):
+    def afficher_aire_de_jeu(self, largeur, hauteur, doc, liste_daleks,liste_ferrailles):
         matrice_jeu = []
         for i in range(hauteur):
             ligne = []
@@ -159,11 +160,12 @@ class Vue():
             matrice_jeu.append(ligne)
 
         matrice_jeu[doc.y][doc.x] = "D"  # position docteur
-
+        print("Position du Docteur [x,y] : " + "[" + str(doc.x+1) + "," + str(doc.y+1) + "]")
         for i in range(0, liste_daleks.__len__()):
             matrice_jeu[liste_daleks[i].y][liste_daleks[i].x] = "X"
         #TODO Ajouter les positions de ferraille
-
+        for i in range(0, liste_ferrailles.__len__()):
+            matrice_jeu[liste_ferrailles[i].y][liste_ferrailles[i].x] = "F"
         for i in matrice_jeu:
             print(i)
 
@@ -173,13 +175,15 @@ class Vue():
         return pos_demandee
 
 
+
+
 class Controleur():  # À déjà créé l'objet # self # __init__ créé avec la l'objet
     def __init__(self):
         self.modele = Modele()
         self.vue = Vue()
 
     def demander_refraichissement_vue(self):
-        reponse = self.vue.afficher_aire_de_jeu(self.modele.largeur, self.modele.hauteur, self.modele.doc, self.modele.liste_daleks)  # reponse  pour le return pos_demandee
+        reponse = self.vue.afficher_aire_de_jeu(self.modele.largeur, self.modele.hauteur, self.modele.doc, self.modele.liste_daleks, self.modele.liste_ferrailles)  # reponse  pour le return pos_demandee
         self.modele.mise_a_jour_jeu(reponse)
         self.modele.collision()
         self.demander_refraichissement_vue()
