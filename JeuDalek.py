@@ -16,6 +16,7 @@ class Modele():  # Logique
         self.liste_ferrailles = []
         self.niveau = 0
         self.nb_daleks_par_niveau = 5
+        self.difficulte = ["Facile","Modéré","Difficile"]
 
 
     def creer_niveau(self):
@@ -70,7 +71,23 @@ class Modele():  # Logique
 
         x = random.randrange(self.largeur)
         y = random.randrange(self.hauteur)
-        pos_invalide = [[self.doc.x, self.doc.y], self.liste_daleks]
+
+        #pos_invalide = [[self.doc.x, self.doc.y], self.liste_daleks,self.liste_ferrailles]
+        pos_invalide = [[self.doc.y,self.doc.x]]
+        pos_invalide.extend(self.liste_ferrailles)
+        #Ajout des Daleks et 2 Unités au tour des Daleks
+        for dalek in self.liste_daleks:
+            for dalek_x in range(-2,3): # de -2 a +2
+                for dalek_y in range(-2,3):
+                    dx =  dalek.x + dalek_x
+                    dy = dalek.y + dalek_y
+                    #Regarder si la position est dans l'aire de jeu
+                    #Entre 0 et les max (hauteur et largeur)
+                    if 0 <= dx < self.largeur and 0 <= dy < self.hauteur:
+                        pos_invalide.append([dx,dy])
+        while [x,y] in pos_invalide:
+            x = random.randrange(self.largeur)
+            y = random.randrange(self.hauteur)
 
         if [x, y] not in pos_invalide:
             self.doc.x = x
@@ -103,12 +120,13 @@ class Modele():  # Logique
                        '': [0, 0]}  # si vide, passe son tourt
         if reponse in dico_valeur:
             self.doc.deplacer(dico_valeur[reponse])
+            self.deplacement_dalek() ## COMPORTEMENT: AUCUN DEPLACEMENT DE DALEK LORS DUN TELEPORT
         elif reponse == 't' or reponse == 'T':
             self.teleportage()
         #TODO:  Ajouter zapper
         #if reponse == 'z' or reponse == 'Z':
 
-        self.deplacement_dalek() # DEPLACEMENT DES DALEKS  A REVOIR ***********
+         # DEPLACEMENT DES DALEKS  A REVOIR ***********
 
 
 class Docteur():
