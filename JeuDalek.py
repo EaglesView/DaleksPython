@@ -19,6 +19,9 @@ class Modele():  # Logique
         self.liste_difficulte = ["Facile","Modéré","Difficile"]
         self.difficulte = "Facile"
 
+    def choix_difficulte(self,reponse:int):
+        self.difficulte = self.liste_difficulte[int(reponse)-1]
+        print("difficulte: "+self.difficulte)
 
     def creer_niveau(self):
         self.niveau += 1
@@ -68,7 +71,7 @@ class Modele():  # Logique
             if i in self.liste_daleks:
                 self.liste_daleks.remove(i)
 
-    def teleportage(self,difficulte:str):
+    def teleportage(self):
 
         x = random.randrange(self.largeur)
         y = random.randrange(self.hauteur)
@@ -77,7 +80,7 @@ class Modele():  # Logique
         pos_invalide = [[self.doc.y,self.doc.x]]
         pos_invalide.extend(self.liste_ferrailles) #Permet d'append une liste
         #Ajout des Daleks et 2 Unités au tour des Daleks
-        if difficulte == "Facile":
+        if self.difficulte == "Facile":
             for dalek in self.liste_daleks:
                 for dalek_x in range(-2,3): # de -2 a +2
                     for dalek_y in range(-2,3):
@@ -87,7 +90,7 @@ class Modele():  # Logique
                         #Entre 0 et les max (hauteur et largeur)
                         if 0 <= dx < self.largeur and 0 <= dy < self.hauteur:
                             pos_invalide.append([dx,dy])
-        elif difficulte == "Modéré":
+        elif self.difficulte == "Modéré":
             pos_invalide.extend(self.liste_daleks)
 
         while [x,y] in pos_invalide:
@@ -161,48 +164,59 @@ class Vue():
     def afficher_difficulte(self):
         print("Choisissez votre difficulté:\n")
         print("1. Facile\n2. Modéré\n3. Difficile\n")
-        while True:
-            choix = input("Votre Choix: ")
-            if choix in ['1','2','3']:
-                return choix
+        #while True:
+        #    choix = input("Votre Choix: ")
+        #    if choix in ['1','2','3']:
+        #        return choix
         
-    def afficher_menu_principal(self,difficulte):
+    def afficher_menu_principal(self):
         print("\nJEU DE DALEK\n")
         print("MENU PRINCIPAL\n")
         print("1. Commencer une partie")
         print("2. Leaderboard")
         print("3. Quitter\n")
-        while True:
-            choix = input("Choix : ")
-            if choix in ['1', '2', '3']:
-                return choix
+        #while True:
+        #    choix = input("Choix : ")
+        #    if choix in ['1', '2', '3']:
+        #        return choix
     #def debug_affichage(nb_daleks,nb_daleks_par_niveau):
     #    print("Affichage Debug \nNombre de Daleks: " + str(nb_daleks))
     #    print("\nNiveau : " + str(niveau) + " Nombre de Daleks pour le niveau " + str(niveau) + ": " + str(nb_daleks_par_niveau*niveau))
     #    print("\nNombre de collisions: " + str(nb_collisions))
 
-    def afficher_aire_de_jeu(self, largeur, hauteur, doc, liste_daleks,liste_ferrailles):
-        matrice_jeu = []
-        for i in range(hauteur):
-            ligne = []
-            for j in range(largeur):
-                ligne.append("-")  # append = ajouter
-            matrice_jeu.append(ligne)
-
-        matrice_jeu[doc.y][doc.x] = "D"  # position docteur
-        print("Position du Docteur [x,y] : " + "[" + str(doc.x+1) + "," + str(doc.y+1) + "]")
-        for i in range(0, liste_daleks.__len__()):
-            matrice_jeu[liste_daleks[i].y][liste_daleks[i].x] = "X"
-        #TODO Ajouter les positions de ferraille
-        for i in range(0, liste_ferrailles.__len__()):
-            matrice_jeu[liste_ferrailles[i].y][liste_ferrailles[i].x] = "F"
-        for i in matrice_jeu:
-            print(i)
-
-        pos_demandee = input(
-            "[z] : zapper \n" "[t] : teleporter\n"  "[1-9] : mouvement \n"  "Votre choix : ")  # input est une string
-        print(pos_demandee)
-        return pos_demandee
+    #def afficher_aire_de_jeu(self, largeur, hauteur, doc, liste_daleks,liste_ferrailles):
+        #matrice_jeu = []
+        #for i in range(hauteur):
+        #    ligne = []
+        #    for j in range(largeur):
+        #        ligne.append("-")  # append = ajouter
+        #    matrice_jeu.append(ligne)
+#
+        #matrice_jeu[doc.y][doc.x] = "D"  # position docteur
+        #print("Position du Docteur [x,y] : " + "[" + str(doc.x+1) + "," + str(doc.y+1) + "]")
+        #for i in range(0, liste_daleks.__len__()):
+        #    matrice_jeu[liste_daleks[i].y][liste_daleks[i].x] = "X"
+        ##TODO Ajouter les positions de ferraille
+        #for i in range(0, liste_ferrailles.__len__()):
+        #    matrice_jeu[liste_ferrailles[i].y][liste_ferrailles[i].x] = "F"
+        #for i in matrice_jeu:
+        #    print(i)
+#
+        #pos_demandee = input(
+        #    "[z] : zapper \n" "[t] : teleporter\n"  "[1-9] : mouvement \n"  "Votre choix : ")  # input est une string
+        #print(pos_demandee)
+        #return pos_demandee
+    def afficher_aire_de_jeu(self, largeur, hauteur, doc, liste_daleks, liste_ferrailles):
+        # display the game board
+        matrice_jeu = [["[   ]" for _ in range(largeur)] for _ in range(hauteur)]
+        matrice_jeu[doc.y][doc.x] = "[ † ]"  # Doctor's position
+        for dalek in liste_daleks:
+            matrice_jeu[dalek.y][dalek.x] = "[ • ]"  # Dalek's position
+        for ferraille in liste_ferrailles:
+            matrice_jeu[ferraille.y][ferraille.x] = "[ º ]"  # Scrap heap
+        for row in matrice_jeu:
+            print("".join(row))
+        print(f"Position du Docteur: [{doc.x+1}, {doc.y+1}]")
 
 
 
@@ -212,13 +226,35 @@ class Controleur():  # À déjà créé l'objet # self # __init__ créé avec la
         self.modele = Modele()
         self.vue = Vue()
 
+    def demander_choix_menu(self):
+        self.vue.afficher_menu_principal()
+        while True:
+            reponse = input("Choix : ")
+            if reponse in ['1','2','3']:
+                match reponse:
+                    case '1':
+                        self.choisir_difficulte()
+                    case '2':
+                        ##TODO: AJOUTER LEADERBOARD
+                        self.choisir_difficulte()
+                    case '3':
+                        exit()
+
     def choisir_difficulte(self):
-        reponse = self.vue.afficher_difficulte()
-        self.modele.difficulte = self.modele.liste_difficulte[reponse-1]
+        self.vue.afficher_difficulte()
+        is_valid =  True
+        while is_valid:
+            reponse = input("Votre Choix: ")
+            if reponse in ['1','2','3']:
+                self.modele.choix_difficulte(reponse)
+                c.modele.creer_niveau()
+                c.demander_refraichissement_vue()
+                
 
     def demander_refraichissement_vue(self):
-        reponse = self.vue.afficher_aire_de_jeu(self.modele.largeur, self.modele.hauteur, self.modele.doc, self.modele.liste_daleks, self.modele.liste_ferrailles)  # reponse  pour le return pos_demandee
-        self.modele.mise_a_jour_jeu(reponse)
+        self.vue.afficher_aire_de_jeu(self.modele.largeur, self.modele.hauteur, self.modele.doc, self.modele.liste_daleks, self.modele.liste_ferrailles)
+        reponse = input("Votre choix (1-9 for movement, 't' to teleport): ")
+        self.modele.mise_a_jour_jeu(reponse,self.modele.difficulte)
         self.modele.collision()
         self.demander_refraichissement_vue()
 
@@ -226,8 +262,8 @@ class Controleur():  # À déjà créé l'objet # self # __init__ créé avec la
 if __name__ == "__main__":
     c = Controleur()  # creation objet
 
-    c.vue.afficher_menu_principal()
-    c.modele.creer_niveau()
-    c.demander_refraichissement_vue()
+    #c.vue.afficher_menu_principal()
+    c.demander_choix_menu()
+    
 
 
