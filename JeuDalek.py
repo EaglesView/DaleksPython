@@ -16,7 +16,8 @@ class Modele():  # Logique
         self.liste_ferrailles = []
         self.niveau = 0
         self.nb_daleks_par_niveau = 5
-        self.difficulte = ["Facile","Modéré","Difficile"]
+        self.liste_difficulte = ["Facile","Modéré","Difficile"]
+        self.difficulte = "Facile"
 
 
     def creer_niveau(self):
@@ -67,7 +68,7 @@ class Modele():  # Logique
             if i in self.liste_daleks:
                 self.liste_daleks.remove(i)
 
-    def teleportage(self):
+    def teleportage(self,difficulte:str):
 
         x = random.randrange(self.largeur)
         y = random.randrange(self.hauteur)
@@ -76,15 +77,19 @@ class Modele():  # Logique
         pos_invalide = [[self.doc.y,self.doc.x]]
         pos_invalide.extend(self.liste_ferrailles) #Permet d'append une liste
         #Ajout des Daleks et 2 Unités au tour des Daleks
-        for dalek in self.liste_daleks:
-            for dalek_x in range(-2,3): # de -2 a +2
-                for dalek_y in range(-2,3):
-                    dx =  dalek.x + dalek_x
-                    dy = dalek.y + dalek_y
-                    #Regarder si la position est dans l'aire de jeu
-                    #Entre 0 et les max (hauteur et largeur)
-                    if 0 <= dx < self.largeur and 0 <= dy < self.hauteur:
-                        pos_invalide.append([dx,dy])
+        if difficulte == "Facile":
+            for dalek in self.liste_daleks:
+                for dalek_x in range(-2,3): # de -2 a +2
+                    for dalek_y in range(-2,3):
+                        dx =  dalek.x + dalek_x
+                        dy = dalek.y + dalek_y
+                        #Regarder si la position est dans l'aire de jeu
+                        #Entre 0 et les max (hauteur et largeur)
+                        if 0 <= dx < self.largeur and 0 <= dy < self.hauteur:
+                            pos_invalide.append([dx,dy])
+        elif difficulte == "Modéré":
+            pos_invalide.extend(self.liste_daleks)
+
         while [x,y] in pos_invalide:
             x = random.randrange(self.largeur)
             y = random.randrange(self.hauteur)
@@ -107,7 +112,7 @@ class Modele():  # Logique
     #     for i in index:
     #         self.liste_daleks.pop(i)
 
-    def mise_a_jour_jeu(self, reponse : chr):  # blinder le choix
+    def mise_a_jour_jeu(self, reponse : chr,difficulte:str):  # blinder le choix
         dico_valeur = {"1": [-1, 1],
                        "2": [0, 1],
                        "3": [1, 1],
@@ -122,11 +127,10 @@ class Modele():  # Logique
             self.doc.deplacer(dico_valeur[reponse])
             self.deplacement_dalek() ## COMPORTEMENT: AUCUN DEPLACEMENT DE DALEK LORS DUN TELEPORT
         elif reponse == 't' or reponse == 'T':
-            self.teleportage()
+            self.teleportage(difficulte)
         #TODO:  Ajouter zapper
         #if reponse == 'z' or reponse == 'Z':
 
-         # DEPLACEMENT DES DALEKS  A REVOIR ***********
 
 
 class Docteur():
@@ -154,7 +158,15 @@ class Vue():
     def __init__(self):
         pass
 
-    def afficher_menu_principal(self):
+    def afficher_difficulte(self):
+        print("Choisissez votre difficulté:\n")
+        print("1. Facile\n2. Modéré\n3. Difficile\n")
+        while True:
+            choix = input("Votre Choix: ")
+            if choix in ['1','2','3']:
+                return choix
+        
+    def afficher_menu_principal(self,difficulte):
         print("\nJEU DE DALEK\n")
         print("MENU PRINCIPAL\n")
         print("1. Commencer une partie")
@@ -200,6 +212,10 @@ class Controleur():  # À déjà créé l'objet # self # __init__ créé avec la
         self.modele = Modele()
         self.vue = Vue()
 
+    def choisir_difficulte(self):
+        reponse = self.vue.afficher_difficulte()
+        self.modele.difficulte = self.modele.liste_difficulte[reponse-1]
+
     def demander_refraichissement_vue(self):
         reponse = self.vue.afficher_aire_de_jeu(self.modele.largeur, self.modele.hauteur, self.modele.doc, self.modele.liste_daleks, self.modele.liste_ferrailles)  # reponse  pour le return pos_demandee
         self.modele.mise_a_jour_jeu(reponse)
@@ -210,7 +226,7 @@ class Controleur():  # À déjà créé l'objet # self # __init__ créé avec la
 if __name__ == "__main__":
     c = Controleur()  # creation objet
 
-    #c.vue.afficher_menu_principal()
+    c.vue.afficher_menu_principal()
     c.modele.creer_niveau()
     c.demander_refraichissement_vue()
 
