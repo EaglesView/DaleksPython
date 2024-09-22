@@ -99,7 +99,7 @@ class Modele():  # Logique
                        "6": [1, 0],
                        "7": [-1, -1],
                        "8": [0, -1],
-                       "9": [1, 1],
+                       "9": [1, -1],
                        '': [0, 0]}  # si vide, passe son tourt
         if reponse in dico_valeur:
             self.doc.deplacer(dico_valeur[reponse])
